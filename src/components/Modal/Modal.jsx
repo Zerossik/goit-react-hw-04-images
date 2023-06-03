@@ -1,16 +1,10 @@
 import { Backdrop, ModalWrap } from './Modal.styled';
-import { React, useEffect } from 'react';
+import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 
 export function Modal({ toggleIsOpen, children }) {
-  // componentWillUnmount() {
-  //   // меняет на useEffect c return
-  //   window.removeEventListener('keydown', this.modalClose);
-  // }
-
   const modalClose = evt => {
-    console.log('+');
     if (evt.code === 'Escape') {
       toggleIsOpen(null);
     }
