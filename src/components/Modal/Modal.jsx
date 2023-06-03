@@ -4,18 +4,17 @@ import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 
 export function Modal({ toggleIsOpen, children }) {
-  const modalClose = evt => {
-    if (evt.code === 'Escape') {
-      toggleIsOpen(null);
-    }
-  };
-
   useEffect(() => {
+    const modalClose = evt => {
+      if (evt.code === 'Escape') {
+        toggleIsOpen(null);
+      }
+    };
     window.addEventListener('keydown', modalClose);
     return () => {
       window.removeEventListener('keydown', modalClose);
     };
-  }, []);
+  }, [toggleIsOpen]);
 
   const handleBackdropClick = evt => {
     if (evt.currentTarget === evt.target) {
