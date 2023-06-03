@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useEffect, useState } from 'react';
 import { Searchbar } from './Searchbar/Searchbar';
 import { getImages } from 'services/images-api';
 import { ImageGallery } from './ImageGallery/ImageGallery';
@@ -7,87 +7,70 @@ import { Spiner } from './Loader/Loader';
 import style from './style.module.css';
 import { Modal } from './Modal/Modal';
 
-export class App extends Component {
-  state = {
-    query: '',
-    page: 1,
-    isLoading: false,
-    images: [],
-    isOpen: false,
-    imgIndex: null,
-  };
+export function App() {
+  const [query, setquery] = useState('');
+  const [page, setpage] = useState(1);
+  const [isLoading, setisLoading] = useState(false);
+  const [images, setimages] = useState([]);
+  const [isOpen, setisOpen] = useState(false);
+  const [imgIndex, setimgIndex] = useState(null);
 
-  componentDidUpdate(prevProps, prevState) {
-    const { query, page } = this.state;
-    if (prevState.query !== query) {
-      this.setState({
-        images: [],
-        isOpen: false,
-      });
-    }
-    if (
-      (prevState.query !== query || prevState.page !== page) &&
-      query !== ''
-    ) {
-      this.setState({
-        isLoading: true,
-      });
+  useEffect(() => {
+    setimages([]);
+  }, [query]);
+
+  useEffect(() => {
+    if (query !== '') {
+      setisOpen(false);
+      setisLoading(true);
 
       getImages(query, page)
         .then(({ data: { hits } }) => {
           if (hits) {
-            this.setState(prevState => ({
-              images: [...prevState.images, ...hits],
-            }));
+            setimages(prev => {
+              return [...prev, ...hits];
+            });
           }
         })
         .catch(error => console.log(error.message))
         .finally(() => {
-          this.setState({
-            isLoading: false,
-          });
+          setisLoading(false);
         });
     }
-  }
+  }, [query, page]);
 
-  onSubmit = query => {
-    this.setState({ query, page: 1 });
+  const onSubmit = query => {
+    setquery(query);
+    setpage(1);
   };
-  handlerPageClick = () => {
-    this.setState(prev => ({
-      page: prev.page + 1,
-    }));
+  const handlerPageClick = () => {
+    setpage(page + 1);
   };
-  toggleIsOpen = index => {
-    this.setState(prevState => ({
-      isOpen: !prevState.isOpen,
-      imgIndex: index,
-    }));
+  const toggleIsOpen = index => {
+    setisOpen(!isOpen);
+    setimgIndex(index);
   };
 
-  render() {
-    const { images, isLoading, isOpen, imgIndex } = this.state;
-    return (
-      <div className={style.wrap}>
-        <Searchbar onSubmit={this.onSubmit} />
+  return (
+    <div className={style.wrap}>
+      <Searchbar onSubmit={onSubmit} />
 
-        {images.length === 0 && <Spiner isLoading={isLoading} />}
-        {images.length > 0 && (
-          <>
-            <ImageGallery images={images} toggleIsOpen={this.toggleIsOpen} />
-            {isLoading ? (
-              <Spiner isLoading={true} />
-            ) : (
-              <Button text={'Load more'} onClick={this.handlerPageClick} />
-            )}
-          </>
-        )}
-        {isOpen && (
-          <Modal toggleIsOpen={this.toggleIsOpen}>
-            <img src={images[imgIndex].largeImageURL} alt="IMG" />
-          </Modal>
-        )}
-      </div>
-    );
-  }
+      {images.length === 0 && <Spiner isLoading={isLoading} />}
+      {images.length > 0 && (
+        <>
+          <ImageGallery images={images} toggleIsOpen={toggleIsOpen} />
+          {isLoading ? (
+            <Spiner isLoading={true} />
+          ) : (
+            <Button text={'Load more'} onClick={handlerPageClick} />
+          )}
+        </>
+      )}
+      {isOpen && (
+        <Modal toggleIsOpen={toggleIsOpen}>
+          <img src={images[imgIndex].largeImageURL} alt="IMG" />
+        </Modal>
+      )}
+    </div>
+  );
 }
