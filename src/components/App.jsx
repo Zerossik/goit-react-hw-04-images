@@ -27,9 +27,7 @@ export function App() {
       getImages(query, page)
         .then(({ data: { hits } }) => {
           if (hits) {
-            setimages(prev => {
-              return [...prev, ...hits];
-            });
+            setimages(prev => [...prev, ...hits]);
           }
         })
         .catch(error => console.log(error.message))
